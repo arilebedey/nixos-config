@@ -100,9 +100,9 @@
     };  
     xserver = {
       enable = true;
-      displayManager.sddm.enable = true;
-      displayManager.sddm.theme = "${import ./sddm-theme.nix { inherit pkgs; }}";
     };
+    displayManager.sddm.enable = true;
+    displayManager.sddm.theme = "${import ./sddm-theme.nix { inherit pkgs; }}";
     locate = {
       enable = true;
       package = pkgs.mlocate;
@@ -132,7 +132,7 @@
   # $ nix search wget
 
   environment.systemPackages = with pkgs; [
-    neovim
+    #neovim
     wget
     waybar
     dunst
@@ -167,12 +167,12 @@
     glow
     python3
     playerctl
-    dfeet
+    d-spy
     libsForQt5.qt5.qtgraphicaleffects
     libsForQt5.qt5.qtmultimedia
     nix-prefetch-git
     pulseaudio
-    rofi
+    rofi-wayland-unwrapped
     fuzzel
     wtype
     vcv-rack
