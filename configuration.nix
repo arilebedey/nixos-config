@@ -19,6 +19,12 @@
       efi.canTouchEfiVariables = true;
       timeout = 4;
     };
+    kernelModules = [
+      "v4l2loopback" # Webcam loopback; DROIDCAM OBS
+    ];
+    extraModulePackages = [
+      pkgs.linuxPackages_latest.v4l2loopback # Webcam loopback; DROIDCAM OBS
+    ];
   };
 
   virtualisation.libvirtd.enable = true;
@@ -91,6 +97,7 @@
   sound.enable = true;
   security.rtkit.enable = true;
   services = {
+    logind.lidSwitchExternalPower = "ignore";
     pipewire = {
       enable = true;
       alsa.enable = true;
@@ -123,10 +130,13 @@
     packages = with pkgs; [
       chromium
       # tree
-      kitty
+      # kitty
     ];
     shell = pkgs.zsh;
   };
+
+  # NixOS doesn't have a plugdev group - needed for connecting via adb
+  # users.groups.plugdev = {};
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -163,7 +173,6 @@
     pfetch
     udisks
     udiskie
-    telegram-desktop
     glow
     python3
     playerctl
@@ -177,13 +186,17 @@
     wtype
     vcv-rack
     bridge-utils
-    qemu
+    # qemu
     ncmpcpp
-    openjdk11
+    # openjdk11
     # davinci-resolve
     clinfo
     # rocmPackages_5.rocminfo
     # rocmPackages_5.rocm-runtime
+    amf-headers
+    zoom-us
+    adb-sync
+    gimp-with-plugins
   ];
 
     fonts.packages = with pkgs; [
@@ -304,7 +317,23 @@
   };
 
   # List services that you want to enable:
+  systemd.user.services.tmux = {
+    enable = true;
+    description = "tmux server";
 
+    # creates the [Service] section
+    # based on the emacs systemd service
+    # does not source uses a login shell so does not load ~/.zshrc in case this is needed
+    # just add -l(E.g bash -cl "...").
+    serviceConfig = {
+      Type = "forking";
+      Restart = "always";
+      ExecStart="${pkgs.bash}/bin/bash -c 'source ${config.system.build.setEnvironment} ; exec ${pkgs.tmux}/bin/tmux start-server'";
+      ExecStop="${pkgs.tmux}/bin/tmux kill-server";
+    };
+
+    wantedBy = [ "default.target" ];
+  };
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
 
